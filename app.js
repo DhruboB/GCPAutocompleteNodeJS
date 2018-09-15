@@ -20,8 +20,10 @@ const express = require('express');
 
 const app = express();
 
+app.set('view engine','ejs');
+
 app.get('/', (req, res) => {
-  res.status(200).send('Hello, world! from Node JS app.').end();
+  res.render('google');
 });
 
 // Start the server
