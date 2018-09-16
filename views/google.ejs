@@ -7,70 +7,75 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <!-- Adding for autocomplete typeahead -->
+    <link rel="stylesheet" href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/css/bootstrap.min.css' media="screen" />
+    <link rel="Stylesheet" href="https://twitter.github.io/typeahead.js/css/examples.css" />
+    <script src='https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.3.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/js/bootstrap.min.js'></script>
+    <script src="https://cdn.rawgit.com/bassjobsen/Bootstrap-3-Typeahead/master/bootstrap3-typeahead.min.js"></script>
     <style>
-    body {
-  background-color: #ffffff;
-}
-  
-.navbar-default {
-  max-height: 40px;
-  background-color: #f3f3f3 !important;
-  border-color: #f3f3f3;
-  color: #ecf0f1;
-}
+        body {
+            background-color: #ffffff;
+        }
+        
+        .navbar-default {
+        max-height: 40px;
+        background-color: #f3f3f3 !important;
+        border-color: #f3f3f3;
+        color: #ecf0f1;
+        }
 
-.navbar-right {
-  float: right;
-}
+        .navbar-right {
+        float: right;
+        }
 
-.navbar-default .navbar-brand {
-  color: #ecf0f1 !important;
-}
+        .navbar-default .navbar-brand {
+        color: #ecf0f1 !important;
+        }
 
-.navbar-default .navbar-nav>li>a {
-  color: #02090a !important;
-}
+        .navbar-default .navbar-nav>li>a {
+        color: #02090a !important;
+        }
 
-.col-xs-6 {
-  float: none !important;
-  margin-left: auto;
-  margin-right: auto;
-}
+        .col-xs-6 {
+        float: none !important;
+        margin-left: auto;
+        margin-right: auto;
+        }
 
-.center-block {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 200px;
-  margin-bottom: 20px;
-}
+        .center-block {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 200px;
+        margin-bottom: 20px;
+        }
 
-.btn-group-wrap {
-  text-align: center;
-  margin-top: 30px;
-}
+        .btn-group-wrap {
+        text-align: center;
+        margin-top: 30px;
+        }
 
-div.btn-group {
-  margin: 0 auto;
-  text-align: center;
-  width: inherit;
-  display: inline-block;
-  padding-right: 5px;
-  padding-left: 5px;
-}
+        div.btn-group {
+        margin: 0 auto;
+        text-align: center;
+        width: inherit;
+        display: inline-block;
+        padding-right: 5px;
+        padding-left: 5px;
+        }
 
-.btn-primary {
-  color: #242525 !important;
-  background-color: #f3f3f3 !important;
-  border-color: #bdbdbd!important;
-}
+        .btn-primary {
+        color: #242525 !important;
+        background-color: #f3f3f3 !important;
+        border-color: #bdbdbd!important;
+        }
 
-.rslt-group-wrap {
-  text-align: center;
-  color: #027715;
-  margin-top: 30px;
-}
-
+        .rslt-group-wrap {
+        text-align: center;
+        color: #027715;
+        margin-top: 30px;
+        }
     </style>
 </head>
 <body>
@@ -109,7 +114,7 @@ div.btn-group {
     <div class="row">
       <div class="col-xs-6">
         <div class="input-group">
-          <input name="product" type="text" class="form-control">
+          <input id="product" name="product" type="text" class="form-control" placeholder="Enter Product Name" autocomplete="off">
           <span class="input-group-btn">
                   <button class="btn btn-primary" type="button"><i class="fa fa-microphone"></i></button>
                 </span>
@@ -117,9 +122,9 @@ div.btn-group {
       </div>
     </div>
     <div class="btn-group-wrap">
-      <div class="btn-group">
+      <!-- <div class="btn-group">
         <button type="submit" class="btn btn-primary" id="google-search">Search Product</button>
-      </div>
+      </div> -->
       <div class="btn-group">
         <button type="submit" class="btn btn-primary" id="feeling-lucky">Feeling Lucky</button>
       </div>
@@ -155,6 +160,43 @@ div.btn-group {
         </div>
       </div>
     </div>
-
-
+    </div>
 </body>
+    <script>
+            $(document).ready(function () {
+                fetchTypeAheadResult();
+            });
+        
+            function fetchTypeAheadResult() {
+                $('#product').typeahead({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: "/search",
+                            dataType: "json",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            success: function (data) {
+                                var items = [];
+                                response($.map(data, function (item) {                            
+                                    items.push(item.name);
+                                }))
+                                response(items);
+        
+                                // SET THE WIDTH AND HEIGHT OF UI AS "auto" ALONG WITH FONT.
+                                // YOU CAN CUSTOMIZE ITS PROPERTIES.
+                                $(".dropdown-menu").css("width", "100%");
+                                $(".dropdown-menu").css("height", "auto");
+                                $(".dropdown-menu").css("font", "12px Verdana");
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert(textStatus);
+                            }
+                        });
+                    },
+                    hint: true,             // SHOW HINT (DEFAULT IS "true").
+                    highlight: true,        // HIGHLIGHT (SET <strong> or <b> BOLD). DEFAULT IS "true".
+                    minLength: 1            // MINIMUM 1 CHARACTER TO START WITH.
+                });
+            }
+        </script>
+</html>

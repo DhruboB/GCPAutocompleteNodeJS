@@ -42,10 +42,30 @@ app.post('/', (req, res) => {
         res.render('google',{ match:null,error:'Error occured after fetching products'});
       } else{
         let productText =  result[0].name;
-        console.log('result.name == ' + productText);
-        res.render('google',{match:productText,error:null});
+        let jsonResult = JSON.stringify(result[0]);
+        res.render('google',{match:jsonResult,error:null});
       }
-    }
+    }2
+  });
+});
+
+// Returns results for type ahead auto complete items
+app.post('/search', (req, res) => {
+  let searchText = req.body.product;
+  let fetchdataurl = 'https://raw.githubusercontent.com/DhruboB/GCPNodeJSTemplate/master/views/public/sampledata.json';
+  // let fetchdataurl = 'https://raw.githubusercontent.com/BestBuyAPIs/open-data-set/master/products.json';
+  request(fetchdataurl, function(err, response, body){
+    if(err){
+      res.render('google',{match:null,error:'Error occured while fetching match'});
+    }else{
+      let result = JSON.parse(body);
+      if(result[0].name == undefined ){
+        console.log('result.name == undefined');
+        res.render('google',{ match:null,error:'Error occured after fetching products'});
+      } else{
+        res.send(JSON.stringify(result));
+      }
+    }2
   });
 });
 
