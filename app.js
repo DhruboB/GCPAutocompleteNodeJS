@@ -14,16 +14,39 @@
  */
 
 'use strict';
-
-// [START gae_node_request_example]
 const express = require('express');
+const bodyParser = require('body-parser');
+const request = require('request');
 
 const app = express();
 
 app.set('view engine','ejs');
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
   res.render('google');
+});
+
+// get the possible 10 products via https request and return
+app.post('/', (req, res) => {
+  let product = req.body.product;
+  let fetchdataurl = 'https://raw.githubusercontent.com/DhruboB/GCPNodeJSTemplate/master/views/public/sampledata.json';
+  request(fetchdataurl, function(err, response, body){
+    if(err){
+      res.render('google',{match:null,error:'Error occured while fetching match'});
+    }else{
+      let result = JSON.parse(body);
+      if(result[0].name == undefined ){
+        console.log('result.name == undefined');
+        res.render('google',{ match:null,error:'Error occured after fetching products'});
+      } else{
+        let productText =  result[0].name;
+        console.log('result.name == ' + productText);
+        res.render('google',{match:productText,error:null});
+      }
+    }
+  });
 });
 
 // Start the server
