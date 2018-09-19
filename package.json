@@ -22,10 +22,13 @@
     "e2e-test": "repo-tools test deploy"
   },
   "dependencies": {
+    "@google-cloud/datastore": "^1.4.2",
     "body-parser": "^1.18.3",
+    "dotenv": "^6.0.0",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "trie-search": "^1.2.8"
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.3.0",

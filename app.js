@@ -17,18 +17,22 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
-
+// const env = require('dotenv').config();
+const datastore = require('./datastore.js');
 const app = express();
 
 app.set('view engine','ejs');
 app.use(express.static('public'));
-app.use(bodyParser.urlencoded({ extended: true }));
+// configure the app to use bodyParser() to extract body from request.
+app.use(bodyParser.urlencoded({ extended: false }));
+// parse various different custom JSON types as JSON
+app.use(bodyParser.json({ type: 'application/*+json' }));
 
 app.get('/', (req, res) => {
   res.render('google');
 });
 
-// get the possible 10 products via https request and return
+// get the possible sample products via https request and return
 app.post('/', (req, res) => {
   let product = req.body.product;
   let fetchdataurl = 'https://raw.githubusercontent.com/DhruboB/GCPNodeJSTemplate/master/views/public/sampledata.json';
@@ -45,15 +49,35 @@ app.post('/', (req, res) => {
         let jsonResult = JSON.stringify(result[0]);
         res.render('google',{match:jsonResult,error:null});
       }
-    }2
+    }
   });
 });
 
+// This API end pooint will respospond on key ajax call for autocomplte functionality.
+app.post('/search', (req, res, next) => {
+  let body = [];
+  req.on('error', (err) => {
+      console.error(err);
+  }).on('data', (chunk) => {
+      // Without parsing data it's present in chunks.
+      body.push(chunk);
+  }).on('end', () => {
+      // Finally converting data into readable form
+      body = Buffer.concat(body).toString();
+      // Setting input back into request, just same what body-parser do.
+      req.body = body;
+      next();
+  });
+}, (req, res) => {
+  let searchText = req.body;
+  var result = triestrct.get(searchText);
+  res.send(result);  
+});
+
 // Returns results for type ahead auto complete items
-app.post('/search', (req, res) => {
+app.post('/sampleSearch', (req, res) => {
   let searchText = req.body.product;
   let fetchdataurl = 'https://raw.githubusercontent.com/DhruboB/GCPNodeJSTemplate/master/views/public/sampledata.json';
-  // let fetchdataurl = 'https://raw.githubusercontent.com/BestBuyAPIs/open-data-set/master/products.json';
   request(fetchdataurl, function(err, response, body){
     if(err){
       res.render('google',{match:null,error:'Error occured while fetching match'});
@@ -63,9 +87,9 @@ app.post('/search', (req, res) => {
         console.log('result.name == undefined');
         res.render('google',{ match:null,error:'Error occured after fetching products'});
       } else{
-        res.send(JSON.stringify(result));
+        res.send(body);
       }
-    }2
+    }
   });
 });
 
@@ -75,4 +99,4 @@ app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
   console.log('Press Ctrl+C to quit.');
 });
-// [END gae_node_request_example]
+// [END]
